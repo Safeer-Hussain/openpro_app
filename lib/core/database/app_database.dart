@@ -67,9 +67,32 @@ class AppDatabase {
         cover_note TEXT,
         scheduled_slots TEXT,
         applied_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        job_title TEXT,
+        company TEXT,
+        company_logo TEXT,
+        salary_range TEXT,
+        location TEXT
       )
     ''');
+
+    try {
+      await db.execute(
+        'ALTER TABLE ${DatabaseTables.applications} ADD COLUMN job_title TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE ${DatabaseTables.applications} ADD COLUMN company TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE ${DatabaseTables.applications} ADD COLUMN company_logo TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE ${DatabaseTables.applications} ADD COLUMN salary_range TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE ${DatabaseTables.applications} ADD COLUMN location TEXT',
+      );
+    } catch (_) {}
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ${DatabaseTables.inmailMessages} (
@@ -109,6 +132,16 @@ class AppDatabase {
         : 0;
     if (inmailCount == 0) {
       await _seedInmailMessages(db);
+    }
+
+    final appCountResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM ${DatabaseTables.applications}',
+    );
+    final appCount = appCountResult.isNotEmpty
+        ? (appCountResult.first['count'] as int? ?? 0)
+        : 0;
+    if (appCount == 0) {
+      await _seedApplications(db);
     }
   }
 
@@ -1001,6 +1034,82 @@ Selector<JobFeedProvider, bool>(
 
     for (final msg in messages) {
       await db.insert(DatabaseTables.inmailMessages, msg);
+    }
+  }
+
+  Future<void> _seedApplications(Database db) async {
+    final now = DateTime.now();
+    final apps = [
+      {
+        'id': 'app_101',
+        'job_id': 'job_101',
+        'user_id': AppConstants.defaultUserId,
+        'status': 'technicalScreening',
+        'cover_note': 'Extensive experience in offline SQLite synchronization and Clean Architecture.',
+        'scheduled_slots': now.add(const Duration(days: 2)).toIso8601String(),
+        'applied_at': now.subtract(const Duration(days: 3)).toIso8601String(),
+        'updated_at': now.subtract(const Duration(hours: 4)).toIso8601String(),
+        'job_title': 'Principal Mobile Systems Architect',
+        'company': 'CloudScale Global',
+        'company_logo': AssetPaths.cloudscaleLogo,
+        'salary_range': '\$210,000 - \$250,000',
+        'location': 'San Francisco, CA (Remote)',
+      },
+      {
+        'id': 'app_102',
+        'job_id': 'job_102',
+        'user_id': AppConstants.defaultUserId,
+        'status': 'underReview',
+        'cover_note':
+            'Passionate about on-device machine learning workflows in Flutter.',
+        'scheduled_slots': '',
+        'applied_at': now.subtract(const Duration(days: 5)).toIso8601String(),
+        'updated_at': now.subtract(const Duration(days: 2)).toIso8601String(),
+        'job_title': 'Staff Flutter Engineer - Offline First',
+        'company': 'QuantumAI Labs',
+        'company_logo': AssetPaths.quantumAiLogo,
+        'salary_range': '\$195,000 - \$235,000',
+        'location': 'New York, NY (Hybrid)',
+      },
+      {
+        'id': 'app_103',
+        'job_id': 'job_103',
+        'user_id': AppConstants.defaultUserId,
+        'status': 'offerReceived',
+        'cover_note': 'High-frequency transactional systems specialist.',
+        'scheduled_slots': '',
+        'applied_at': now.subtract(const Duration(days: 12)).toIso8601String(),
+        'updated_at': now.subtract(const Duration(hours: 12)).toIso8601String(),
+        'job_title': 'Lead Mobile Systems Engineer',
+        'company': 'FinTech Prime',
+        'company_logo': AssetPaths.fintechPrimeLogo,
+        'salary_range': '\$220,000 - \$260,000',
+        'location': 'Austin, TX (Remote)',
+      },
+      {
+        'id': 'app_104',
+        'job_id': 'job_104',
+        'user_id': AppConstants.defaultUserId,
+        'status': 'applied',
+        'cover_note':
+            'Architectural expertise in telemetry and battery optimization.',
+        'scheduled_slots': '',
+        'applied_at': now.subtract(const Duration(hours: 8)).toIso8601String(),
+        'updated_at': now.subtract(const Duration(hours: 8)).toIso8601String(),
+        'job_title': 'Senior Flutter Developer',
+        'company': 'EcoTrack Systems',
+        'company_logo': AssetPaths.techcorpLogo,
+        'salary_range': '\$170,000 - \$200,000',
+        'location': 'Seattle, WA (Remote)',
+      },
+    ];
+
+    for (final app in apps) {
+      await db.insert(
+        DatabaseTables.applications,
+        app,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
   }
 

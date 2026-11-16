@@ -79,7 +79,7 @@ The engineering assistant shall:
   - Unit test in `test/unit/resume_exporter_test.dart`.
 
 ### Sprint 07: Application Stage Progression Pipeline
-- [ ] **Task Definition:** Create an interactive Kanban-style visual pipeline tracker for submitted job applications (Applied -> Under Review -> Technical Screening -> Offer Received -> Archived).
+- [x] **Task Definition:** Create an interactive Kanban-style visual pipeline tracker for submitted job applications (Applied -> Under Review -> Technical Screening -> Offer Received -> Archived).
 - **Scope:** `lib/presentation/jobs/widgets/application_pipeline_view.dart`, `lib/presentation/jobs/viewmodels/application_pipeline_viewmodel.dart`.
 - **Acceptance Criteria:**
   - Horizontal drag-and-drop or tap-to-advance stage progression.

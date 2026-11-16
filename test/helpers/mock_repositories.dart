@@ -12,11 +12,13 @@ import 'package:open_pro/domain/entities/comment_entity.dart';
 import 'package:open_pro/domain/entities/event_entity.dart';
 import 'package:open_pro/domain/entities/group_entity.dart';
 import 'package:open_pro/domain/entities/inmail_message.dart';
+import 'package:open_pro/domain/entities/job_application_entity.dart';
 import 'package:open_pro/domain/entities/job_entity.dart';
 import 'package:open_pro/domain/entities/post_entity.dart';
 import 'package:open_pro/domain/entities/skill_endorsement.dart';
 import 'package:open_pro/domain/entities/story_entity.dart';
 import 'package:open_pro/domain/entities/user_profile_entity.dart';
+import 'package:open_pro/domain/repositories/application_repository_interface.dart';
 import 'package:open_pro/domain/repositories/inmail_repository_interface.dart';
 
 class MockJobRepository extends JobRepository {
@@ -720,5 +722,138 @@ class MockInmailRepository implements InmailRepositoryInterface {
   Future<int> getUnreadCount({String? category, String? userId}) async {
     final messages = await getMessages(category: category, userId: userId);
     return messages.where((m) => m.status == 'unread').length;
+  }
+}
+
+class MockApplicationRepository implements ApplicationRepositoryInterface {
+  List<JobApplicationEntity> inMemoryApplications;
+
+  MockApplicationRepository({List<JobApplicationEntity>? applications})
+    : inMemoryApplications =
+          applications ??
+          [
+            JobApplicationEntity(
+              id: 'app_101',
+              jobId: 'job_101',
+              userId: 'user_safeer',
+              jobTitle: 'Principal Mobile Systems Architect',
+              company: 'CloudScale Global',
+              companyLogo: 'assets/images/cloudscale.png',
+              salaryRange: '\$210,000 - \$250,000',
+              location: 'San Francisco, CA (Remote)',
+              stage: ApplicationStage.technicalScreening,
+              coverNote: 'Extensive experience in offline SQLite synchronization and Clean Architecture.',
+              scheduledSlots: const ['2026-11-18T10:00:00.000'],
+              appliedAt: DateTime.now().subtract(const Duration(days: 3)),
+              updatedAt: DateTime.now().subtract(const Duration(hours: 4)),
+            ),
+            JobApplicationEntity(
+              id: 'app_102',
+              jobId: 'job_102',
+              userId: 'user_safeer',
+              jobTitle: 'Staff Flutter Engineer - Offline First',
+              company: 'QuantumAI Labs',
+              companyLogo: 'assets/images/quantum_ai.png',
+              salaryRange: '\$195,000 - \$235,000',
+              location: 'New York, NY (Hybrid)',
+              stage: ApplicationStage.underReview,
+              coverNote: 'Passionate about on-device ML.',
+              scheduledSlots: const [],
+              appliedAt: DateTime.now().subtract(const Duration(days: 5)),
+              updatedAt: DateTime.now().subtract(const Duration(days: 2)),
+            ),
+            JobApplicationEntity(
+              id: 'app_103',
+              jobId: 'job_103',
+              userId: 'user_safeer',
+              jobTitle: 'Lead Mobile Systems Engineer',
+              company: 'FinTech Prime',
+              companyLogo: 'assets/images/fintech_prime.png',
+              salaryRange: '\$220,000 - \$260,000',
+              location: 'Austin, TX (Remote)',
+              stage: ApplicationStage.offerReceived,
+              coverNote: 'High-frequency systems specialist.',
+              scheduledSlots: const [],
+              appliedAt: DateTime.now().subtract(const Duration(days: 12)),
+              updatedAt: DateTime.now().subtract(const Duration(hours: 12)),
+            ),
+            JobApplicationEntity(
+              id: 'app_104',
+              jobId: 'job_104',
+              userId: 'user_safeer',
+              jobTitle: 'Senior Flutter Developer',
+              company: 'EcoTrack Systems',
+              companyLogo: 'assets/images/techcorp.png',
+              salaryRange: '\$170,000 - \$200,000',
+              location: 'Seattle, WA (Remote)',
+              stage: ApplicationStage.applied,
+              coverNote: 'Telemetry and power efficiency expert.',
+              scheduledSlots: const [],
+              appliedAt: DateTime.now().subtract(const Duration(hours: 8)),
+              updatedAt: DateTime.now().subtract(const Duration(hours: 8)),
+            ),
+          ];
+
+  @override
+  Future<List<JobApplicationEntity>> getApplications({String? userId}) async {
+    if (userId == null || userId.isEmpty) {
+      return List<JobApplicationEntity>.from(inMemoryApplications);
+    }
+    return inMemoryApplications.where((a) => a.userId == userId).toList();
+  }
+
+  @override
+  Future<JobApplicationEntity?> getApplicationById(String id) async {
+    final match = inMemoryApplications.where((a) => a.id == id);
+    if (match.isEmpty) return null;
+    return match.first;
+  }
+
+  @override
+  Future<JobApplicationEntity> updateApplicationStage({
+    required String applicationId,
+    required ApplicationStage newStage,
+  }) async {
+    final index = inMemoryApplications.indexWhere((a) => a.id == applicationId);
+    if (index == -1) {
+      throw StateError('Application not found');
+    }
+    final updated = inMemoryApplications[index].copyWith(
+      stage: newStage,
+      updatedAt: DateTime.now(),
+    );
+    inMemoryApplications[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<JobApplicationEntity> createApplication({
+    required String jobId,
+    required String userId,
+    required String jobTitle,
+    required String company,
+    required String companyLogo,
+    required String salaryRange,
+    required String location,
+    String? coverNote,
+  }) async {
+    final now = DateTime.now();
+    final newApp = JobApplicationEntity(
+      id: 'app_${jobId}_$userId',
+      jobId: jobId,
+      userId: userId,
+      jobTitle: jobTitle,
+      company: company,
+      companyLogo: companyLogo,
+      salaryRange: salaryRange,
+      location: location,
+      stage: ApplicationStage.applied,
+      coverNote: coverNote,
+      scheduledSlots: const [],
+      appliedAt: now,
+      updatedAt: now,
+    );
+    inMemoryApplications.insert(0, newApp);
+    return newApp;
   }
 }

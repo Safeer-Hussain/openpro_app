@@ -5,6 +5,7 @@ import '../network/api_client.dart';
 import '../network/mock_network_interceptor.dart';
 import '../notifications/local_notification_service.dart';
 import '../../data/repositories/ai_assistant_repository.dart';
+import '../../data/repositories/application_repository.dart';
 import '../../data/repositories/community_repository.dart';
 import '../../data/repositories/inmail_repository.dart';
 import '../../data/repositories/job_repository.dart';
@@ -46,6 +47,9 @@ Future<void> setupServiceLocator() async {
 
   final inmailRepo = InmailRepository(database: database);
   sl.registerSingleton<InmailRepository>(inmailRepo);
+
+  final applicationRepo = ApplicationRepository(database: database);
+  sl.registerSingleton<ApplicationRepository>(applicationRepo);
 
   final aiRepo = AiAssistantRepository(
     database: database,

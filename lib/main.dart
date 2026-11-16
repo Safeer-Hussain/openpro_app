@@ -8,6 +8,7 @@ import 'core/services/service_locator.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/repositories/ai_assistant_repository.dart';
+import 'data/repositories/application_repository.dart';
 import 'data/repositories/community_repository.dart';
 import 'data/repositories/inmail_repository.dart';
 import 'data/repositories/job_repository.dart';
@@ -16,6 +17,7 @@ import 'data/repositories/social_repository.dart';
 import 'presentation/ai_assistant/viewmodels/ai_assistant_viewmodel.dart';
 import 'presentation/community/viewmodels/community_viewmodel.dart';
 import 'presentation/job_feed/viewmodels/job_feed_viewmodel.dart';
+import 'presentation/jobs/viewmodels/application_pipeline_viewmodel.dart';
 import 'presentation/messages/viewmodels/inmail_viewmodel.dart';
 import 'presentation/profile/viewmodels/debug_settings_viewmodel.dart';
 import 'presentation/profile/viewmodels/profile_viewmodel.dart';
@@ -57,6 +59,11 @@ class OpenProApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => InmailViewModel(repository: sl<InmailRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ApplicationPipelineViewModel(
+            repository: sl<ApplicationRepository>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) => DebugSettingsViewModel(

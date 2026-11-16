@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/utils/app_feedback.dart';
+import '../../jobs/widgets/application_pipeline_view.dart';
 import '../viewmodels/job_feed_viewmodel.dart';
 import 'widgets/job_card.dart';
 
@@ -197,6 +198,19 @@ class JobFeedView extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: 'Application Pipeline',
+                icon: const Icon(Icons.view_kanban_outlined, size: 20),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ApplicationPipelineView(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 6),
               IconButton.filledTonal(
                 icon: Icon(
                   vm.viewType == JobFeedViewType.verticalFeed
