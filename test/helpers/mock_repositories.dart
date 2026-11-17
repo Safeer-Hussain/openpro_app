@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:open_pro/core/constants/app_constants.dart';
 import 'package:open_pro/core/database/app_database.dart';
 import 'package:open_pro/data/repositories/ai_assistant_repository.dart';
 import 'package:open_pro/data/repositories/community_repository.dart';
@@ -7,6 +8,7 @@ import 'package:open_pro/data/repositories/job_repository.dart';
 import 'package:open_pro/data/repositories/profile_repository.dart';
 import 'package:open_pro/data/repositories/skill_repository.dart';
 import 'package:open_pro/data/repositories/social_repository.dart';
+import 'package:open_pro/domain/entities/app_notification_entity.dart';
 import 'package:open_pro/domain/entities/chat_message_entity.dart';
 import 'package:open_pro/domain/entities/comment_entity.dart';
 import 'package:open_pro/domain/entities/event_entity.dart';
@@ -20,6 +22,7 @@ import 'package:open_pro/domain/entities/story_entity.dart';
 import 'package:open_pro/domain/entities/user_profile_entity.dart';
 import 'package:open_pro/domain/repositories/application_repository_interface.dart';
 import 'package:open_pro/domain/repositories/inmail_repository_interface.dart';
+import 'package:open_pro/domain/repositories/notification_repository_interface.dart';
 
 class MockJobRepository extends JobRepository {
   List<JobEntity> inMemoryJobs;
@@ -855,5 +858,113 @@ class MockApplicationRepository implements ApplicationRepositoryInterface {
     );
     inMemoryApplications.insert(0, newApp);
     return newApp;
+  }
+}
+
+class MockNotificationRepository implements NotificationRepositoryInterface {
+  List<AppNotificationEntity> inMemoryNotifications;
+
+  MockNotificationRepository({List<AppNotificationEntity>? notifications})
+    : inMemoryNotifications =
+          notifications ??
+          [
+            AppNotificationEntity(
+              id: 'mock_notif_1',
+              userId: AppConstants.defaultUserId,
+              title: 'High Compatibility Recruiter View',
+              body: 'CloudScale Global recruiter Sarah Vance reviewed your profile.',
+              category: NotificationCategory.recruiter,
+              referenceId: 'job_101',
+              company: 'CloudScale Global',
+              avatarUrl: 'assets/images/cloudscale.png',
+              matchScore: 96,
+              isRead: false,
+              timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
+            ),
+            AppNotificationEntity(
+              id: 'mock_notif_2',
+              userId: AppConstants.defaultUserId,
+              title: 'Application Stage Advanced',
+              body: 'Your application at CloudScale Global has advanced to Technical Screening.',
+              category: NotificationCategory.job,
+              referenceId: 'app_101',
+              company: 'CloudScale Global',
+              avatarUrl: 'assets/images/cloudscale.png',
+              matchScore: 96,
+              isRead: false,
+              timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+            ),
+            AppNotificationEntity(
+              id: 'mock_notif_3',
+              userId: AppConstants.defaultUserId,
+              title: 'Keynote Speaker Invitation',
+              body: 'Flutter Architecture Guild invited you to speak.',
+              category: NotificationCategory.community,
+              referenceId: 'event_1',
+              company: 'Flutter Guild',
+              avatarUrl: 'assets/images/cloudscale.png',
+              matchScore: null,
+              isRead: true,
+              timestamp: DateTime.now().subtract(const Duration(days: 1)),
+            ),
+          ];
+
+  @override
+  Future<List<AppNotificationEntity>> getNotifications({
+    NotificationCategory? category,
+    String? userId,
+  }) async {
+    var result = List<AppNotificationEntity>.from(inMemoryNotifications);
+    if (userId != null && userId.isNotEmpty) {
+      result = result.where((n) => n.userId == userId).toList();
+    }
+    if (category != null) {
+      result = result.where((n) => n.category == category).toList();
+    }
+    return result;
+  }
+
+  @override
+  Future<int> getUnreadCount({String? userId}) async {
+    var list = inMemoryNotifications;
+    if (userId != null && userId.isNotEmpty) {
+      list = list.where((n) => n.userId == userId).toList();
+    }
+    return list.where((n) => !n.isRead).length;
+  }
+
+  @override
+  Future<void> markAsRead(String notificationId) async {
+    final index = inMemoryNotifications.indexWhere(
+      (n) => n.id == notificationId,
+    );
+    if (index != -1) {
+      inMemoryNotifications[index] = inMemoryNotifications[index].copyWith(
+        isRead: true,
+      );
+    }
+  }
+
+  @override
+  Future<void> markAllAsRead({String? userId}) async {
+    inMemoryNotifications = inMemoryNotifications.map((n) {
+      if (userId == null || userId.isEmpty || n.userId == userId) {
+        return n.copyWith(isRead: true);
+      }
+      return n;
+    }).toList();
+  }
+
+  @override
+  Future<void> deleteNotification(String notificationId) async {
+    inMemoryNotifications.removeWhere((n) => n.id == notificationId);
+  }
+
+  @override
+  Future<AppNotificationEntity> addNotification(
+    AppNotificationEntity notification,
+  ) async {
+    inMemoryNotifications.insert(0, notification);
+    return notification;
   }
 }

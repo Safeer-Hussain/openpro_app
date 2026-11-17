@@ -9,6 +9,7 @@ import '../../data/repositories/application_repository.dart';
 import '../../data/repositories/community_repository.dart';
 import '../../data/repositories/inmail_repository.dart';
 import '../../data/repositories/job_repository.dart';
+import '../../data/repositories/notification_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../data/repositories/skill_repository.dart';
 import '../../data/repositories/social_repository.dart';
@@ -47,6 +48,9 @@ Future<void> setupServiceLocator() async {
 
   final inmailRepo = InmailRepository(database: database);
   sl.registerSingleton<InmailRepository>(inmailRepo);
+
+  final notificationRepo = NotificationRepository(database: database);
+  sl.registerSingleton<NotificationRepository>(notificationRepo);
 
   final applicationRepo = ApplicationRepository(database: database);
   sl.registerSingleton<ApplicationRepository>(applicationRepo);

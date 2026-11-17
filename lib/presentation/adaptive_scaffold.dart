@@ -4,14 +4,18 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/constants/app_constants.dart';
 import '../core/constants/asset_paths.dart';
 import '../core/notifications/local_notification_service.dart';
 import '../core/services/service_locator.dart';
+import '../domain/entities/app_notification_entity.dart';
 import 'ai_assistant/views/ai_career_assistant_view.dart';
 import 'community/views/community_hub_view.dart';
 import 'job_feed/views/job_feed_view.dart';
 import 'messages/inmail_inbox_view.dart';
 import 'messages/viewmodels/inmail_viewmodel.dart';
+import 'notifications/viewmodels/notifications_viewmodel.dart';
+import 'notifications/views/notifications_center_view.dart';
 import 'profile/views/profile_view.dart';
 import 'social_feed/views/social_feed_view.dart';
 
@@ -68,6 +72,28 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     _notificationSubscription = service.notificationStream.listen((notif) {
       if (mounted) {
         setState(() => _activePushBanner = notif);
+        try {
+          final notifVm = Provider.of<NotificationsViewModel>(
+            context,
+            listen: false,
+          );
+          notifVm.addNotification(
+            AppNotificationEntity(
+              id: notif.id,
+              userId: AppConstants.defaultUserId,
+              title: notif.title,
+              body: notif.body,
+              category: NotificationCategory.recruiter,
+              referenceId: 'recruiter_${notif.company}',
+              company: notif.company,
+              avatarUrl: AssetPaths.cloudscaleLogo,
+              matchScore: notif.matchScore,
+              isRead: false,
+              timestamp: notif.timestamp,
+            ),
+          );
+        } catch (_) {}
+
         Future.delayed(const Duration(seconds: 4), () {
           if (mounted && _activePushBanner?.id == notif.id) {
             setState(() => _activePushBanner = null);
@@ -127,6 +153,34 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                   padding: EdgeInsets.zero,
                 ),
               ),
+            Consumer<NotificationsViewModel>(
+              builder: (context, notifVm, _) {
+                final unread = notifVm.unreadCount;
+                return IconButton(
+                  key: const Key('app_bar_notifications_button'),
+                  tooltip: 'Notification Center',
+                  icon: Badge(
+                    isLabelVisible: unread > 0,
+                    label: Text(
+                      unread.toString(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    child: const Icon(Icons.notifications_outlined),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsCenterView(),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
             Consumer<InmailViewModel>(
               builder: (context, inmailVm, _) {
                 final unread = inmailVm.totalUnreadCount;

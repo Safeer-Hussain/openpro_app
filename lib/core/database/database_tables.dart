@@ -12,4 +12,5 @@ class DatabaseTables {
   static const String skillEndorsements = 'skill_endorsements';
   static const String applications = 'applications';
   static const String inmailMessages = 'inmail_messages';
+  static const String notifications = 'notifications';
 }

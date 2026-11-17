@@ -88,7 +88,7 @@ The engineering assistant shall:
   - Unit and widget tests in `test/widget/application_pipeline_test.dart`.
 
 ### Sprint 08: Push Notification History Center
-- [ ] **Task Definition:** Build a centralized Notification Center view that displays all historical simulated notifications (recruiter views, job alerts, application updates).
+- [x] **Task Definition:** Build a centralized Notification Center view that displays all historical simulated notifications (recruiter views, job alerts, application updates).
 - **Scope:** `lib/presentation/notifications/notifications_center_view.dart`, `lib/presentation/notifications/notifications_viewmodel.dart`.
 - **Acceptance Criteria:**
   - Filter by category: All, Recruiter Alerts, Job Updates, Community Activity.

@@ -114,6 +114,22 @@ class AppDatabase {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${DatabaseTables.notifications} (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        category TEXT NOT NULL,
+        reference_id TEXT,
+        company TEXT,
+        avatar_url TEXT,
+        match_score INTEGER,
+        is_read INTEGER NOT NULL DEFAULT 0,
+        timestamp TEXT NOT NULL
+      )
+    ''');
+
     final countResult = await db.rawQuery(
       'SELECT COUNT(*) as count FROM ${DatabaseTables.skillEndorsements}',
     );
@@ -142,6 +158,16 @@ class AppDatabase {
         : 0;
     if (appCount == 0) {
       await _seedApplications(db);
+    }
+
+    final notifCountResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM ${DatabaseTables.notifications}',
+    );
+    final notifCount = notifCountResult.isNotEmpty
+        ? (notifCountResult.first['count'] as int? ?? 0)
+        : 0;
+    if (notifCount == 0) {
+      await _seedNotifications(db);
     }
   }
 
@@ -1113,6 +1139,100 @@ Selector<JobFeedProvider, bool>(
     }
   }
 
+  Future<void> _seedNotifications(Database db) async {
+    final now = DateTime.now();
+    final notifications = [
+      {
+        'id': 'notif_1',
+        'user_id': AppConstants.defaultUserId,
+        'title': 'High Compatibility Recruiter View',
+        'body': 'CloudScale Global recruiter Sarah Vance reviewed your profile for Principal Mobile Systems Architect.',
+        'category': 'recruiter',
+        'reference_id': 'job_101',
+        'company': 'CloudScale Global',
+        'avatar_url': AssetPaths.cloudscaleLogo,
+        'match_score': 96,
+        'is_read': 0,
+        'timestamp': now
+            .subtract(const Duration(minutes: 45))
+            .toIso8601String(),
+      },
+      {
+        'id': 'notif_2',
+        'user_id': AppConstants.defaultUserId,
+        'title': 'Application Stage Advanced',
+        'body': 'Your application at CloudScale Global has advanced to Technical Screening.',
+        'category': 'job',
+        'reference_id': 'app_101',
+        'company': 'CloudScale Global',
+        'avatar_url': AssetPaths.cloudscaleLogo,
+        'match_score': 96,
+        'is_read': 0,
+        'timestamp': now.subtract(const Duration(hours: 3)).toIso8601String(),
+      },
+      {
+        'id': 'notif_3',
+        'user_id': AppConstants.defaultUserId,
+        'title': 'New InMail Outreach Received',
+        'body': 'Elena Rostova sent an inquiry regarding Executive Staff Mobile Architect opportunities.',
+        'category': 'recruiter',
+        'reference_id': 'inmail_1',
+        'company': 'CloudScale Global',
+        'avatar_url': AssetPaths.cloudscaleLogo,
+        'match_score': 94,
+        'is_read': 0,
+        'timestamp': now.subtract(const Duration(hours: 7)).toIso8601String(),
+      },
+      {
+        'id': 'notif_4',
+        'user_id': AppConstants.defaultUserId,
+        'title': 'Keynote Speaker Invitation',
+        'body': 'Flutter Architecture Guild invited you to speak on Offline SQLite Synchronization.',
+        'category': 'community',
+        'reference_id': 'event_roundtable',
+        'company': 'Flutter Guild',
+        'avatar_url': AssetPaths.techcorpLogo,
+        'match_score': null,
+        'is_read': 1,
+        'timestamp': now.subtract(const Duration(days: 1)).toIso8601String(),
+      },
+      {
+        'id': 'notif_5',
+        'user_id': AppConstants.defaultUserId,
+        'title': 'Compensation Percentile Benchmark Shift',
+        'body': 'Principal Mobile Systems Architect compensation band in San Francisco shifted +6.4% higher.',
+        'category': 'job',
+        'reference_id': 'benchmark_sf',
+        'company': 'OpenPro Insights',
+        'avatar_url': AssetPaths.appIcon,
+        'match_score': null,
+        'is_read': 1,
+        'timestamp': now.subtract(const Duration(days: 2)).toIso8601String(),
+      },
+      {
+        'id': 'notif_6',
+        'user_id': AppConstants.defaultUserId,
+        'title': 'Peer Skill Endorsements',
+        'body': 'Marcus Thorne and 2 others endorsed your skill in Clean Architecture & SOLID.',
+        'category': 'community',
+        'reference_id': 'skill_clean_arch',
+        'company': 'QuantumAI Labs',
+        'avatar_url': AssetPaths.quantumAiLogo,
+        'match_score': null,
+        'is_read': 1,
+        'timestamp': now.subtract(const Duration(days: 3)).toIso8601String(),
+      },
+    ];
+
+    for (final notif in notifications) {
+      await db.insert(
+        DatabaseTables.notifications,
+        notif,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
   Future<void> resetDatabase() async {
     final db = await database;
     await db.delete(DatabaseTables.jobs);
@@ -1128,6 +1248,7 @@ Selector<JobFeedProvider, bool>(
     await db.delete(DatabaseTables.skillEndorsements);
     await db.delete(DatabaseTables.applications);
     await db.delete(DatabaseTables.inmailMessages);
+    await db.delete(DatabaseTables.notifications);
     await _seedInitialData(db);
   }
 }

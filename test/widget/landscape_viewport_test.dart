@@ -12,6 +12,7 @@ import 'package:open_pro/presentation/community/viewmodels/community_viewmodel.d
 import 'package:open_pro/presentation/job_feed/viewmodels/job_feed_viewmodel.dart';
 import 'package:open_pro/presentation/jobs/viewmodels/application_pipeline_viewmodel.dart';
 import 'package:open_pro/presentation/messages/viewmodels/inmail_viewmodel.dart';
+import 'package:open_pro/presentation/notifications/viewmodels/notifications_viewmodel.dart';
 import 'package:open_pro/presentation/profile/viewmodels/debug_settings_viewmodel.dart';
 import 'package:open_pro/presentation/profile/viewmodels/profile_viewmodel.dart';
 import 'package:open_pro/presentation/social_feed/viewmodels/social_feed_viewmodel.dart';
@@ -54,6 +55,10 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (_) => InmailViewModel(repository: MockInmailRepository()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              NotificationsViewModel(repository: MockNotificationRepository()),
         ),
         ChangeNotifierProvider(
           create: (_) => ApplicationPipelineViewModel(
