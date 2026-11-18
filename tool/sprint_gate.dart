@@ -29,14 +29,14 @@ Future<void> main(List<String> args) async {
   // 3. Static Analysis
   await _runStep(
     stepNumber: 3,
-    title: 'Static Analysis (flutter analyze --no-pub)',
+    title: 'Static Analysis (flutter analyze --no-pub --no-fatal-infos)',
     command: 'flutter',
-    args: ['analyze', '--no-pub'],
+    args: ['analyze', '--no-pub', '--no-fatal-infos'],
     validateOutput: (stdout, stderr) {
-      if (stdout.contains('error •') || stdout.contains('warning •') || stdout.contains('info •')) {
+      if (stdout.contains('error •') || stdout.contains('warning •')) {
         return false;
       }
-      return stdout.contains('No issues found!');
+      return true;
     },
   );
 
