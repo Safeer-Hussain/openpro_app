@@ -97,7 +97,7 @@ The engineering assistant shall:
   - Unit tests in `test/unit/notifications_viewmodel_test.dart`.
 
 ### Sprint 09: Offline Queue and Sync Engine
-- [ ] **Task Definition:** Implement an offline mutation queue that captures likes, comments, and applications when connectivity is lost and dispatches them in order upon reconnection.
+- [x] **Task Definition:** Implement an offline mutation queue that captures likes, comments, and applications when connectivity is lost and dispatches them in order upon reconnection.
 - **Scope:** `lib/core/network/offline_sync_queue.dart`, `lib/core/network/sync_manager.dart`.
 - **Acceptance Criteria:**
   - Enqueues mutation payloads into SQLite `sync_queue` table when offline.

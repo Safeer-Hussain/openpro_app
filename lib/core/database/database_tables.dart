@@ -13,4 +13,5 @@ class DatabaseTables {
   static const String applications = 'applications';
   static const String inmailMessages = 'inmail_messages';
   static const String notifications = 'notifications';
+  static const String syncQueue = 'sync_queue';
 }

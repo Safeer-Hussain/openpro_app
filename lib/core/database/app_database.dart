@@ -130,6 +130,18 @@ class AppDatabase {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${DatabaseTables.syncQueue} (
+        id TEXT PRIMARY KEY,
+        action_type TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        status TEXT NOT NULL,
+        retry_count INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        error_message TEXT
+      )
+    ''');
+
     final countResult = await db.rawQuery(
       'SELECT COUNT(*) as count FROM ${DatabaseTables.skillEndorsements}',
     );
@@ -1249,6 +1261,7 @@ Selector<JobFeedProvider, bool>(
     await db.delete(DatabaseTables.applications);
     await db.delete(DatabaseTables.inmailMessages);
     await db.delete(DatabaseTables.notifications);
+    await db.delete(DatabaseTables.syncQueue);
     await _seedInitialData(db);
   }
 }

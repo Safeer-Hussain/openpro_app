@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:open_pro/core/constants/app_constants.dart';
 import 'package:open_pro/core/database/app_database.dart';
+import 'package:open_pro/core/network/offline_sync_queue.dart';
 import 'package:open_pro/data/repositories/ai_assistant_repository.dart';
 import 'package:open_pro/data/repositories/community_repository.dart';
 import 'package:open_pro/data/repositories/job_repository.dart';
@@ -19,6 +20,7 @@ import 'package:open_pro/domain/entities/job_entity.dart';
 import 'package:open_pro/domain/entities/post_entity.dart';
 import 'package:open_pro/domain/entities/skill_endorsement.dart';
 import 'package:open_pro/domain/entities/story_entity.dart';
+import 'package:open_pro/domain/entities/sync_mutation_entity.dart';
 import 'package:open_pro/domain/entities/user_profile_entity.dart';
 import 'package:open_pro/domain/repositories/application_repository_interface.dart';
 import 'package:open_pro/domain/repositories/inmail_repository_interface.dart';
@@ -966,5 +968,102 @@ class MockNotificationRepository implements NotificationRepositoryInterface {
   ) async {
     inMemoryNotifications.insert(0, notification);
     return notification;
+  }
+}
+
+class MockOfflineSyncQueue implements OfflineSyncQueueInterface {
+  List<SyncMutationEntity> inMemoryQueue;
+
+  MockOfflineSyncQueue({List<SyncMutationEntity>? queue})
+    : inMemoryQueue = queue ?? [];
+
+  @override
+  Future<SyncMutationEntity> enqueue({
+    required SyncActionType actionType,
+    required Map<String, dynamic> payload,
+  }) async {
+    final mutation = SyncMutationEntity(
+      id: 'mock_mut_${inMemoryQueue.length + 1}',
+      actionType: actionType,
+      payload: payload,
+      status: SyncStatus.pending,
+      retryCount: 0,
+      createdAt: DateTime.now(),
+    );
+    inMemoryQueue.add(mutation);
+    return mutation;
+  }
+
+  @override
+  Future<List<SyncMutationEntity>> getPendingMutations() async {
+    return inMemoryQueue
+        .where((m) => (m.isPending || m.isFailed) && m.retryCount < 5)
+        .toList();
+  }
+
+  @override
+  Future<List<SyncMutationEntity>> getAllMutations() async {
+    return List.unmodifiable(inMemoryQueue.reversed.toList());
+  }
+
+  @override
+  Future<int> getPendingCount() async {
+    return inMemoryQueue.where((m) => m.isPending || m.isFailed).length;
+  }
+
+  @override
+  Future<void> updateMutation(SyncMutationEntity mutation) async {
+    final index = inMemoryQueue.indexWhere((m) => m.id == mutation.id);
+    if (index != -1) {
+      inMemoryQueue[index] = mutation;
+    }
+  }
+
+  @override
+  Future<void> markSyncing(String id) async {
+    final index = inMemoryQueue.indexWhere((m) => m.id == id);
+    if (index != -1) {
+      inMemoryQueue[index] = inMemoryQueue[index].copyWith(
+        status: SyncStatus.syncing,
+      );
+    }
+  }
+
+  @override
+  Future<void> markCompleted(String id) async {
+    final index = inMemoryQueue.indexWhere((m) => m.id == id);
+    if (index != -1) {
+      inMemoryQueue[index] = inMemoryQueue[index].copyWith(
+        status: SyncStatus.completed,
+        errorMessage: null,
+      );
+    }
+  }
+
+  @override
+  Future<void> markFailed(String id, String error, {int? retryCount}) async {
+    final index = inMemoryQueue.indexWhere((m) => m.id == id);
+    if (index != -1) {
+      inMemoryQueue[index] = inMemoryQueue[index].copyWith(
+        status: SyncStatus.failed,
+        errorMessage: error,
+        retryCount: retryCount ?? (inMemoryQueue[index].retryCount + 1),
+      );
+    }
+  }
+
+  @override
+  Future<void> deleteMutation(String id) async {
+    inMemoryQueue.removeWhere((m) => m.id == id);
+  }
+
+  @override
+  Future<void> clearCompleted() async {
+    inMemoryQueue.removeWhere((m) => m.isCompleted);
+  }
+
+  @override
+  Future<void> clearAll() async {
+    inMemoryQueue.clear();
   }
 }

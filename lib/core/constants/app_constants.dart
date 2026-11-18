@@ -1,7 +1,7 @@
 class AppConstants {
   static const String appName = 'OpenPro';
   static const String appTagline = 'Next-Gen AI Professional Network';
-  static const String appVersion = '1.0.0+1';
+  static const String appVersion = '1.0.1+2';
 
   // Seeded Profile Constants
   static const String defaultUserId = 'usr_safeer_001';

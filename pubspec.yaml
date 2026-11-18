@@ -1,7 +1,7 @@
 name: open_pro
 description: "OpenPro - Next-Generation AI-Powered Professional Network & Recruiter-Talent Matching Platform"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.13.7

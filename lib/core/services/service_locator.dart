@@ -1,8 +1,11 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 
 import '../database/app_database.dart';
 import '../network/api_client.dart';
 import '../network/mock_network_interceptor.dart';
+import '../network/offline_sync_queue.dart';
+import '../network/sync_manager.dart';
 import '../notifications/local_notification_service.dart';
 import '../../data/repositories/ai_assistant_repository.dart';
 import '../../data/repositories/application_repository.dart';
@@ -29,6 +32,15 @@ Future<void> setupServiceLocator() async {
 
   final notificationService = LocalNotificationService();
   sl.registerSingleton<LocalNotificationService>(notificationService);
+
+  final syncQueue = OfflineSyncQueue(database: database);
+  sl.registerSingleton<OfflineSyncQueue>(syncQueue);
+
+  final syncManager = SyncManager(
+    queue: syncQueue,
+    connectivity: Connectivity(),
+  );
+  sl.registerSingleton<SyncManager>(syncManager);
 
   // Repositories
   final jobRepo = JobRepository(database: database);

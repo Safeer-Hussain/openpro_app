@@ -6,10 +6,12 @@ import 'package:provider/provider.dart';
 
 import '../core/constants/app_constants.dart';
 import '../core/constants/asset_paths.dart';
+import '../core/network/sync_manager.dart';
 import '../core/notifications/local_notification_service.dart';
 import '../core/services/service_locator.dart';
 import '../domain/entities/app_notification_entity.dart';
 import 'ai_assistant/views/ai_career_assistant_view.dart';
+import 'common/widgets/offline_sync_modal.dart';
 import 'community/views/community_hub_view.dart';
 import 'job_feed/views/job_feed_view.dart';
 import 'messages/inmail_inbox_view.dart';
@@ -153,6 +155,35 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                   padding: EdgeInsets.zero,
                 ),
               ),
+            Consumer<SyncManager>(
+              builder: (context, syncMgr, _) {
+                final pending = syncMgr.pendingCount;
+                if (pending == 0 && !_isOffline) {
+                  return const SizedBox.shrink();
+                }
+                return IconButton(
+                  key: const Key('app_bar_sync_queue_button'),
+                  tooltip: 'Offline Sync Queue ($pending pending)',
+                  icon: Badge(
+                    isLabelVisible: pending > 0,
+                    label: Text(
+                      pending.toString(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    child: Icon(
+                      _isOffline ? Icons.cloud_off_rounded : Icons.sync_rounded,
+                      color: pending > 0
+                          ? colorScheme.tertiary
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  onPressed: () => OfflineSyncModal.show(context),
+                );
+              },
+            ),
             Consumer<NotificationsViewModel>(
               builder: (context, notifVm, _) {
                 final unread = notifVm.unreadCount;

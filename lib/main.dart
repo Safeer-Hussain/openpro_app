@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'core/database/app_database.dart';
 import 'core/network/mock_network_interceptor.dart';
+import 'core/network/sync_manager.dart';
 import 'core/notifications/local_notification_service.dart';
 import 'core/services/service_locator.dart';
 import 'core/theme/app_theme.dart';
@@ -71,6 +72,7 @@ class OpenProApp extends StatelessWidget {
             repository: sl<ApplicationRepository>(),
           ),
         ),
+        ChangeNotifierProvider(create: (_) => sl<SyncManager>()),
         ChangeNotifierProvider(
           create: (_) => DebugSettingsViewModel(
             mockInterceptor: sl<MockNetworkInterceptor>(),

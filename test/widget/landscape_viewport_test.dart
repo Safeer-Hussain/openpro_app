@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_pro/core/database/app_database.dart';
 import 'package:open_pro/core/network/mock_network_interceptor.dart';
+import 'package:open_pro/core/network/sync_manager.dart';
 import 'package:open_pro/core/notifications/local_notification_service.dart';
 import 'package:open_pro/core/services/service_locator.dart';
 import 'package:open_pro/core/theme/app_theme.dart';
@@ -64,6 +65,9 @@ void main() {
           create: (_) => ApplicationPipelineViewModel(
             repository: MockApplicationRepository(),
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SyncManager(queue: MockOfflineSyncQueue()),
         ),
         ChangeNotifierProvider(
           create: (_) => DebugSettingsViewModel(
